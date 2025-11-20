@@ -2,6 +2,8 @@ package com.travelscheduler.di;
 
 import com.travelscheduler.data.datasources.local.*;
 import com.travelscheduler.data.repositories.*;
+import com.travelscheduler.domain.myusecases.DeletePlanUseCase;
+import com.travelscheduler.domain.myusecases.ViewPlansUseCase;
 import com.travelscheduler.domain.repositories.*;
 import com.travelscheduler.domain.usecases.user.*;
 import com.travelscheduler.presentation.presenters.*;
@@ -9,6 +11,11 @@ import com.travelscheduler.presentation.swing.utils.SwingWorkerHelper;
 import com.travelscheduler.presentation.swing.utils.UIHelper;
 import com.travelscheduler.presentation.views.*;
 import com.travelscheduler.presentation.swing.frames.*;
+import com.travelscheduler.domain.repositories.PlanRepository;
+import com.travelscheduler.data.repositories.PlanRepositoryImpl;
+import com.travelscheduler.presentation.views.PlansView;
+import com.travelscheduler.presentation.presenters.PlansPresenter;
+import com.travelscheduler.presentation.swing.frames.PlansFrame;
 
 public class DependencyContainer {
     private static DependencyContainer instance;
@@ -27,6 +34,13 @@ public class DependencyContainer {
     private AuthenticateUserUseCase authenticateUserUseCase;
     private CreateUserUseCase createUserUseCase;
     private UpdateUserPreferencesUseCase updateUserPreferencesUseCase;
+
+    // Repositories
+    private PlanRepository planRepository;
+
+    // Use cases
+    private ViewPlansUseCase viewPlansUseCase;
+    private DeletePlanUseCase deletePlanUseCase;
 
     private DependencyContainer() {
         initializeComponents();
@@ -54,6 +68,10 @@ public class DependencyContainer {
         authenticateUserUseCase = new AuthenticateUserUseCase(userRepository);
         createUserUseCase = new CreateUserUseCase(userRepository);
         updateUserPreferencesUseCase = new UpdateUserPreferencesUseCase(userRepository);
+
+        planRepository = new PlanRepositoryImpl();
+        viewPlansUseCase = new ViewPlansUseCase(planRepository);
+        deletePlanUseCase = new DeletePlanUseCase(planRepository);
     }
 
     // Provider methods for presentation layer
@@ -96,5 +114,25 @@ public class DependencyContainer {
 
     public SwingWorkerHelper provideSwingWorkerHelper() {
         return new SwingWorkerHelper();
+    }
+
+    public ViewPlansUseCase provideViewPlansUseCase() {
+        return viewPlansUseCase;
+    }
+
+    public DeletePlanUseCase provideDeletePlanUseCase() {
+        return deletePlanUseCase;
+    }
+
+    public PlanRepository getPlanRepository() {
+        return planRepository;
+    }
+    public PlansPresenter providePlansPresenter(PlansView view, String userId) {
+        return new PlansPresenter(view, viewPlansUseCase, deletePlanUseCase, userId);
+    }
+
+    public PlansFrame providePlansFrame(String userId) {
+        PlansPresenter presenter = providePlansPresenter(null, userId);
+        return new PlansFrame(presenter);
     }
 }

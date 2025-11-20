@@ -60,12 +60,26 @@ public class MainDashboardFrame extends JFrame implements MainDashboardView {
         JButton preferencesButton = createFeatureButton("Set Preferences", "🛠️",
                 "Set your travel preferences and interests", new Color(100, 149, 237));
 
+        JButton myPlansButton = createFeatureButton("My Plans", "🗺️",
+                "View and manage your saved travel plans", new Color(60, 179, 113));
+
+        gbc.gridy = 0;
         contentPanel.add(preferencesButton, gbc);
+
+        gbc.gridy = 1;  // second row
+        contentPanel.add(myPlansButton, gbc);
 
         mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         // Add action listener
         preferencesButton.addActionListener(e -> presenter.onPreferencesClicked());
+
+        myPlansButton.addActionListener(e -> {
+            String currentUserId = currentUser.getEmail();  // or getUserId()
+            PlansFrame plansFrame = com.travelscheduler.di.DependencyContainer.getInstance()
+                    .providePlansFrame(currentUserId);
+            plansFrame.setVisible(true);
+        });
 
         add(mainPanel);
     }
